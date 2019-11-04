@@ -191,8 +191,109 @@ func TestIsHappy(t *testing.T) {
 	if s.isHappy() {
 		t.Errorf("not a valid win condition")
 	}
+	s.cakes = []bool{false, false, false, false, false}
+	if s.isHappy() {
+		t.Errorf("not a valid win condition")
+	}
 	s.cakes = []bool{true, true, true, true, true}
 	if !s.isHappy() {
 		t.Errorf("valid condition not detected")
+	}
+}
+
+func TestLowestFlip(t *testing.T) {
+	s := &stack{}
+	s.cakes = []bool{false, true, false, true, false}
+	n := s.lowestFlip()
+	b := 5
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{false, false, false, false, true}
+	n = s.lowestFlip()
+	b = 4
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{false, true, false, true, true}
+	n = s.lowestFlip()
+	b = 3
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{false, false, true, true, true}
+	n = s.lowestFlip()
+	b = 2
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{false, true, true, true, true}
+	n = s.lowestFlip()
+	b = 1
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{true, true, true, true, true}
+	n = s.lowestFlip()
+	b = 0
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+}
+
+func TestPrepTop(t *testing.T) {
+	s := &stack{}
+	s.cakes = []bool{false, false, false, false, false}
+	n := s.prepTop()
+	b := 0
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{false, true, true, true, true}
+	n = s.prepTop()
+	b = 0
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{true, false, true, true, true}
+	n = s.prepTop()
+	b = 1
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{true, true, false, true, true}
+	n = s.prepTop()
+	b = 2
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{true, true, true, false, true}
+	n = s.prepTop()
+	b = 3
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{true, true, true, true, false}
+	n = s.prepTop()
+	b = 4
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
+	}
+
+	s.cakes = []bool{true, true, true, true, true}
+	n = s.prepTop()
+	b = 5
+	if n != b {
+		t.Errorf("%d should be %d", n, b)
 	}
 }

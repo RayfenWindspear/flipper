@@ -65,7 +65,8 @@ func (s *stack) lowestFlip() int {
 	return 0
 }
 
-// prepTop returns the number to pre-flip on top to make sure at least the top pancake (or more) is -, so that a deep flip actually makes n'th happy
+// prepTop returns the number to pre-flip on top to make sure at least the top pancake (or more) is -, so that a deep flip actually makes n'th happy.
+// In other words, it returns the number of consecutive "+"'s from the top to flip.
 func (s *stack) prepTop() int {
 	num := 0
 	for _, v := range s.cakes {
