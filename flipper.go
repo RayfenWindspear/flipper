@@ -112,9 +112,7 @@ func (f *flipper) solveNext() error {
 	s.cakes = make([]bool, len(f.problem[f.current]))
 	for i, v := range f.problem[f.current] {
 		// byte values for + and - are 43 and 45 respectively when the string is ranged over, but stack's zero vals are already false, so just detect +
-		if v == 43 {
-			s.cakes[i] = true
-		}
+		s.cakes[i] = v == 43
 	}
 	for !s.isHappy() {
 		err := s.flip(s.prepTop())
