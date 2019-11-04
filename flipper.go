@@ -104,7 +104,7 @@ func (f *flipper) readProblem() error {
 }
 
 // solveNext preps and solves a single input line, the one indicated by the index 'current', and prints the solution to os.Stdout.
-// It solves by
+// It solves by iteratively padding the top with as many "-"" as it can with 0-1 flip, then flipping from the bottommost "-"
 func (f *flipper) solveNext() error {
 	// restructure as []bool so we can work in place
 	s := &stack{}
