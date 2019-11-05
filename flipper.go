@@ -2,100 +2,46 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
+	"io"
 	"os"
 )
-
-// competition io template (returns added) from:
-// https://www.codementor.io/tucnak/using-golang-for-competitive-programming-h8lhvxzt3
-var reader *bufio.Reader = bufio.NewReader(os.Stdin)
-var writer *bufio.Writer = bufio.NewWriter(os.Stdout)
-
-func printf(f string, a ...interface{}) (n int, err error) { return fmt.Fprintf(writer, f, a...) }
-func scanf(f string, a ...interface{}) (n int, err error)  { return fmt.Fscanf(reader, f, a...) }
-
-// end template
-
-var errFlipTooMany = errors.New("specified too many pancakes to flip")
-
-// stack represents a stack of pancakes and has some ease of use methods
-type stack struct {
-	cakes []bool
-	flips int
-}
-
-// flip flips the first n pancakes
-func (s *stack) flip(n int) error {
-	if n == 0 {
-		return nil
-	}
-	if n > len(s.cakes) {
-		return errFlipTooMany
-	}
-	// flip in place
-	for left, right := 0, n-1; left < right; left, right = left+1, right-1 {
-		s.cakes[left], s.cakes[right] = !s.cakes[right], !s.cakes[left]
-	}
-	// the above is a regular reverse, which normally doesn't care about an odd middle, but we need to invert it
-	if n%2 == 1 {
-		s.cakes[n/2] = !s.cakes[n/2]
-	}
-	s.flips++
-	return nil
-}
-
-// isHappy checks if all are true and we are done
-func (s *stack) isHappy() bool {
-	for _, v := range s.cakes {
-		if !v {
-			return false
-		}
-	}
-	return true
-}
-
-// lowestFlip finds the first from the bottom that needs to be flipped. Returns how many to flip to fix it
-func (s *stack) lowestFlip() int {
-	for i := len(s.cakes) - 1; i >= 0; i-- {
-		if !s.cakes[i] {
-			return i + 1 // flip method wants how many to flip, not index. so +1
-		}
-	}
-	return 0
-}
-
-// prepTop returns the number to pre-flip on top to make sure at least the top pancake (or more) is -, so that a deep flip actually makes n'th happy.
-// In other words, it returns the number of consecutive "+"'s from the top to flip.
-func (s *stack) prepTop() int {
-	num := 0
-	for _, v := range s.cakes {
-		if v {
-			num++
-		} else {
-			break
-		}
-	}
-	return num
-}
 
 // flipper is the solver for the pancake problem. Handles the input and output and solves.
 type flipper struct {
 	length  int
 	problem []string
 	current int
+	reader  *bufio.Reader
+	writer  *bufio.Writer
 }
 
-// readProblem reads the problem from os.Stdin and stores it in the struct members.
+// NewFlipper creates a new flipper struct with buffered io using the passed in input and output sinks.
+func NewFlipper(in io.Reader, out io.Writer) *flipper {
+	return &flipper{
+		length:  0,
+		problem: nil,
+		current: 0,
+		reader:  bufio.NewReader(in),
+		writer:  bufio.NewWriter(out),
+	}
+}
+
+// newFlipper internal ease of use function just calls NewFlipper using os.Stdin and os.Stdout.
+func newFlipper() *flipper {
+	return NewFlipper(os.Stdin, os.Stdout)
+}
+
+// readProblem reads the problem from flipper.reader and stores it in the struct members.
 func (f *flipper) readProblem() error {
-	_, err := scanf("%d\n", &f.length)
+	_, err := fmt.Fscanf(f.reader, "%d\n", &f.length)
 	if err != nil {
 		return err
 	}
 	f.problem = make([]string, f.length)
 	for i := 0; i < f.length; i++ {
 		var line string
-		_, err = scanf("%s\n", &line)
+		_, err = fmt.Fscanf(f.reader, "%s\n", &line)
 		if err != nil {
 			return err
 		}
@@ -128,12 +74,13 @@ func (f *flipper) solveNext() error {
 		}
 	}
 	f.current++
-	printf("Case #%d: %d\n", f.current, s.flips)
+	fmt.Fprintf(f.writer, "Case #%d: %d\n", f.current, s.flips)
 	return nil
 }
 
 // solveAll just iterates and solves all the problems in the set.
 func (f *flipper) solveAll() error {
+	defer f.writer.Flush()
 	for i := 0; i < f.length; i++ {
 		err := f.solveNext()
 		if err != nil {
@@ -144,9 +91,7 @@ func (f *flipper) solveAll() error {
 }
 
 func main() {
-	defer writer.Flush()
-
-	f := &flipper{}
+	f := newFlipper()
 
 	err := f.readProblem()
 	if err != nil {

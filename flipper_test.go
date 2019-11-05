@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"os"
 	"strings"
@@ -18,14 +17,20 @@ const data = `8
 --+
 ---`
 
-func TestReadProblem(t *testing.T) {
-	f := &flipper{}
+const output = `Case #1: 0
+Case #2: 2
+Case #3: 2
+Case #4: 2
+Case #5: 1
+Case #6: 3
+Case #7: 1
+Case #8: 1
+`
 
-	reader = bufio.NewReader(bytes.NewBuffer([]byte(data)))
+func TestReadProblem(t *testing.T) {
+	f := NewFlipper(bytes.NewBuffer([]byte(data)), os.Stdout)
 
 	err := f.readProblem()
-	// restore reader to stdin
-	reader = bufio.NewReader(os.Stdin)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -47,18 +52,13 @@ func TestReadProblem(t *testing.T) {
 }
 
 func TestSolveNext(t *testing.T) {
-	f := &flipper{}
+	out := bytes.NewBuffer(nil)
+	f := NewFlipper(bytes.NewBuffer([]byte(data)), out)
 
-	reader = bufio.NewReader(bytes.NewBuffer([]byte(data)))
 	err := f.readProblem()
-	// restore reader to stdin
-	reader = bufio.NewReader(os.Stdin)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	buf := bytes.NewBuffer(nil)
-	writer = bufio.NewWriter(buf)
 	err = f.solveNext()
 	if err != nil {
 		t.Fatal(err)
@@ -67,233 +67,27 @@ func TestSolveNext(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer.Flush()
+	f.writer.Flush()
 
-	// restore writer to stdout
-	writer = bufio.NewWriter(os.Stdout)
-
-	str := string(buf.Bytes())
-
-	if str != "Case #1: 0\nCase #2: 2\n" {
-		t.Errorf("Incorrect results:\n%s", str)
+	if string(out.Bytes()) != "Case #1: 0\nCase #2: 2\n" {
+		t.Errorf("Incorrect results:\n%s", string(out.Bytes()))
 	}
 }
 
 func TestSolveAll(t *testing.T) {
-	f := &flipper{}
+	out := bytes.NewBuffer(nil)
+	f := NewFlipper(bytes.NewBuffer([]byte(data)), out)
 
-	reader = bufio.NewReader(bytes.NewBuffer([]byte(data)))
 	err := f.readProblem()
-	// restore reader to stdin
-	reader = bufio.NewReader(os.Stdin)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	buf := bytes.NewBuffer(nil)
-	writer = bufio.NewWriter(buf)
 	err = f.solveAll()
 	if err != nil {
 		t.Fatal(err)
 	}
-	writer.Flush()
 
-	// restore writer to stdout
-	writer = bufio.NewWriter(os.Stdout)
-
-	str := string(buf.Bytes())
-
-	if str != `Case #1: 0
-Case #2: 2
-Case #3: 2
-Case #4: 2
-Case #5: 1
-Case #6: 3
-Case #7: 1
-Case #8: 1
-` {
-		t.Errorf("Incorrect results:\n%s", str)
-	}
-}
-
-func stackEquals(s, test []bool) bool {
-	if len(s) != len(test) {
-		return false
-	}
-	for i := 0; i < len(s); i++ {
-		if s[i] != test[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func TestFlip(t *testing.T) {
-	s := &stack{}
-	s.cakes = []bool{false, true, false, true, false}
-	err := s.flip(5)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !stackEquals(s.cakes, []bool{true, false, true, false, true}) {
-		t.Errorf("Bad flip check %+v\n", s.cakes)
-	}
-
-	err = s.flip(4)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !stackEquals(s.cakes, []bool{true, false, true, false, true}) {
-		t.Errorf("Bad flip check %+v\n", s.cakes)
-	}
-
-	err = s.flip(3)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !stackEquals(s.cakes, []bool{false, true, false, false, true}) {
-		t.Errorf("Bad flip check %+v\n", s.cakes)
-	}
-
-	err = s.flip(2)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !stackEquals(s.cakes, []bool{false, true, false, false, true}) {
-		t.Errorf("Bad flip check %+v\n", s.cakes)
-	}
-
-	err = s.flip(1)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !stackEquals(s.cakes, []bool{true, true, false, false, true}) {
-		t.Errorf("Bad flip check %+v\n", s.cakes)
-	}
-
-	err = s.flip(6)
-	if err != errFlipTooMany {
-		t.Fatal("uncaught overflow error")
-	}
-}
-
-func TestIsHappy(t *testing.T) {
-	s := &stack{}
-	s.cakes = []bool{false, true, false, true, false}
-	if s.isHappy() {
-		t.Errorf("not a valid win condition")
-	}
-	s.cakes = []bool{true, true, false, true, false}
-	if s.isHappy() {
-		t.Errorf("not a valid win condition")
-	}
-	s.cakes = []bool{true, true, true, true, false}
-	if s.isHappy() {
-		t.Errorf("not a valid win condition")
-	}
-	s.cakes = []bool{false, false, false, false, false}
-	if s.isHappy() {
-		t.Errorf("not a valid win condition")
-	}
-	s.cakes = []bool{true, true, true, true, true}
-	if !s.isHappy() {
-		t.Errorf("valid condition not detected")
-	}
-}
-
-func TestLowestFlip(t *testing.T) {
-	s := &stack{}
-	s.cakes = []bool{false, true, false, true, false}
-	n := s.lowestFlip()
-	b := 5
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{false, false, false, false, true}
-	n = s.lowestFlip()
-	b = 4
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{false, true, false, true, true}
-	n = s.lowestFlip()
-	b = 3
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{false, false, true, true, true}
-	n = s.lowestFlip()
-	b = 2
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{false, true, true, true, true}
-	n = s.lowestFlip()
-	b = 1
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{true, true, true, true, true}
-	n = s.lowestFlip()
-	b = 0
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-}
-
-func TestPrepTop(t *testing.T) {
-	s := &stack{}
-	s.cakes = []bool{false, false, false, false, false}
-	n := s.prepTop()
-	b := 0
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{false, true, true, true, true}
-	n = s.prepTop()
-	b = 0
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{true, false, true, true, true}
-	n = s.prepTop()
-	b = 1
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{true, true, false, true, true}
-	n = s.prepTop()
-	b = 2
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{true, true, true, false, true}
-	n = s.prepTop()
-	b = 3
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{true, true, true, true, false}
-	n = s.prepTop()
-	b = 4
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
-	}
-
-	s.cakes = []bool{true, true, true, true, true}
-	n = s.prepTop()
-	b = 5
-	if n != b {
-		t.Errorf("%d should be %d", n, b)
+	if string(out.Bytes()) != output {
+		t.Errorf("Incorrect results:\n%s", string(out.Bytes()))
 	}
 }
