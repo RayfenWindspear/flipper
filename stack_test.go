@@ -54,6 +54,42 @@ func TestStackEquals(t *testing.T) {
 	}
 }
 
+func TestNewStack(t *testing.T) {
+	s, err := NewStack("++++")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !s.equals([]bool{true, true, true, true}) {
+		t.Errorf("NewStack failed %+v\n", s.cakes)
+	}
+	s, err = NewStack("+-+-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !s.equals([]bool{true, false, true, false}) {
+		t.Errorf("NewStack failed %+v\n", s.cakes)
+	}
+	s, err = NewStack("----")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !s.equals([]bool{false, false, false, false}) {
+		t.Errorf("NewStack failed %+v\n", s.cakes)
+	}
+	s, err = NewStack("----+")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !s.equals([]bool{false, false, false, false, true}) {
+		t.Errorf("NewStack failed %+v\n", s.cakes)
+	}
+
+	s, err = NewStack("----+a")
+	if err != errInvalidString {
+		t.Errorf("NewStack failed invalid string")
+	}
+}
+
 func TestFlip(t *testing.T) {
 	s := &stack{}
 	s.cakes = []bool{false, true, false, true, false}

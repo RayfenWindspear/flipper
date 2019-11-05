@@ -4,12 +4,31 @@ import (
 	"errors"
 )
 
+const plusByteValue = 43
+const minusByteValue = 45
+
 var errFlipTooMany = errors.New("specified too many pancakes to flip")
+var errInvalidString = errors.New("invalid input string. Must only consist of + or - characters.")
 
 // stack represents a stack of pancakes and has some ease of use methods
 type stack struct {
 	cakes []bool
 	flips int
+}
+
+// NewStack takes a string of + and - and returns a stack struct
+func NewStack(in string) (*stack, error) {
+	// restructure as []bool so we can work in place
+	s := &stack{}
+	s.cakes = make([]bool, len(in))
+	for i, v := range in {
+		if v != plusByteValue && v != minusByteValue {
+			return nil, errInvalidString
+		}
+		// byte values for + and - are 43 and 45 respectively when the string is ranged over, but stack's zero vals are already false, so just detect +
+		s.cakes[i] = v == 43
+	}
+	return s, nil
 }
 
 // flip flips the first n pancakes in-place in the slice of bools and increments the flip count.

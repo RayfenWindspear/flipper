@@ -53,12 +53,9 @@ func (f *flipper) readProblem() error {
 // solveNext preps and solves a single input line, the one indicated by the index 'current', and prints the solution to os.Stdout.
 // It solves by iteratively padding the top with as many "-"" as it can with 0-1 flip, then flipping from the bottommost "-"
 func (f *flipper) solveNext() error {
-	// restructure as []bool so we can work in place
-	s := &stack{}
-	s.cakes = make([]bool, len(f.problem[f.current]))
-	for i, v := range f.problem[f.current] {
-		// byte values for + and - are 43 and 45 respectively when the string is ranged over, but stack's zero vals are already false, so just detect +
-		s.cakes[i] = v == 43
+	s, err := NewStack(f.problem[f.current])
+	if err != nil {
+		return err
 	}
 	for !s.isHappy() {
 		err := s.flip(s.prepTop())
