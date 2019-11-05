@@ -4,6 +4,56 @@ import (
 	"testing"
 )
 
+func TestStackEquals(t *testing.T) {
+	s := &stack{}
+	s.cakes = []bool{false, false, false, false, false, false}
+	test := []bool{false, false, false, false, false, false}
+
+	if !s.equals(test) {
+		t.Errorf("equals failed valid %+v, %+v\n", s.cakes, test)
+	}
+	test[5] = true
+	if s.equals(test) {
+		t.Errorf("equals failed invalid %+v, %+v\n", s.cakes, test)
+	}
+	if s.equals([]bool{false, false, false, false, false}) {
+		t.Errorf("equals failed invalid short size %+v, %+v\n", s.cakes, test)
+	}
+	if s.equals([]bool{false, false, false, false, false, false, false}) {
+		t.Errorf("equals failed invalid long size %+v, %+v\n", s.cakes, test)
+	}
+	s.cakes = []bool{}
+	if !s.equals([]bool{}) {
+		t.Errorf("equals failed 0 length %+v, %+v\n", s.cakes, test)
+	}
+
+	for l := 0; l <= 10; l++ {
+		s.cakes = make([]bool, l)
+		// test a bunch of mutations... just cuz
+		for i := 0; i < l; i++ {
+			test = make([]bool, l)
+			s.cakes[i] = true
+			if s.equals(test) {
+				t.Errorf("equals failed. should be false %+v, %+v\n", s.cakes, test)
+			}
+			for j := 0; j < l; j++ {
+				test[j] = true
+				check := s.equals(test)
+				if i == j {
+					// test should succeed iff i == j
+					if !check {
+						t.Errorf("equals failed. should be true %+v, %+v\n", s.cakes, test)
+					}
+				} else {
+					if check {
+						t.Errorf("equals failed. should be false %+v, %+v\n", s.cakes, test)
+					}
+				}
+			}
+		}
+	}
+}
+
 func TestFlip(t *testing.T) {
 	s := &stack{}
 	s.cakes = []bool{false, true, false, true, false}
@@ -11,7 +61,7 @@ func TestFlip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.stackEquals([]bool{true, false, true, false, true}) {
+	if !s.equals([]bool{true, false, true, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
@@ -19,7 +69,7 @@ func TestFlip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.stackEquals([]bool{true, false, true, false, true}) {
+	if !s.equals([]bool{true, false, true, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
@@ -27,7 +77,7 @@ func TestFlip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.stackEquals([]bool{false, true, false, false, true}) {
+	if !s.equals([]bool{false, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
@@ -35,7 +85,7 @@ func TestFlip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.stackEquals([]bool{false, true, false, false, true}) {
+	if !s.equals([]bool{false, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
@@ -43,7 +93,7 @@ func TestFlip(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.stackEquals([]bool{true, true, false, false, true}) {
+	if !s.equals([]bool{true, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 

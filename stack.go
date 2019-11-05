@@ -68,8 +68,8 @@ func (s *stack) prepTop() int {
 	return num
 }
 
-// stackEquals is just a helper method for checking the state of those yummy pancakes to see if their current state is equal to the passed in slice.
-func (s *stack) stackEquals(test []bool) bool {
+// equals is just a helper method for checking the state of those yummy pancakes to see if their current state is equal to the passed in slice.
+func (s *stack) equals(test []bool) bool {
 	if len(s.cakes) != len(test) {
 		return false
 	}
