@@ -87,14 +87,23 @@ func (f *flipper) solveAll() error {
 	return nil
 }
 
-func main() {
+// DoEverything is just an exported function that creates a default flipper, reads the input, solves, and outputs.
+func DoEverything() error {
 	f := newFlipper()
 
 	err := f.readProblem()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = f.solveAll()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func main() {
+	err := DoEverything()
 	if err != nil {
 		panic(err)
 	}
