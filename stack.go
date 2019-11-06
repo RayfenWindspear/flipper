@@ -32,7 +32,7 @@ func NewStack(in string) (*Stack, error) {
 }
 
 // Flip flips the first n pancakes in-place in the slice of bools and increments the internal flip counter.
-// n <= 0 is a noOp.
+// n <= 0 is a no-op and does not increment the flip count.
 func (s *Stack) Flip(n int) error {
 	if n == 0 {
 		return nil
@@ -87,7 +87,7 @@ func (s *Stack) PrepTop() int {
 	return num
 }
 
-// equals is just a helper method for checking the state of those yummy pancakes to see if their current state is equal to the passed in slice.
+// Equals is just a helper method for checking the state of those yummy pancakes to see if their current state is equal to the passed in slice.
 func (s *Stack) Equals(test []bool) bool {
 	if len(s.cakes) != len(test) {
 		return false
@@ -100,7 +100,7 @@ func (s *Stack) Equals(test []bool) bool {
 	return true
 }
 
-// EqualsString is just a helper method for checking the state of those yummy pancakes to see if their current state is equal to the passed in string.
+// EqualsString accepts a string and passes to Equals.
 func (s *Stack) EqualsString(test string) (bool, error) {
 	ts, err := NewStack(test)
 	if err != nil {
