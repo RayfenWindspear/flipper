@@ -1,4 +1,4 @@
-package main
+package flipper
 
 import (
 	"bufio"
@@ -100,11 +100,4 @@ func DoEverything() error {
 		return err
 	}
 	return nil
-}
-
-func main() {
-	err := DoEverything()
-	if err != nil {
-		panic(err)
-	}
 }
