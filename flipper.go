@@ -1,4 +1,4 @@
-// Package flipper contains a solution to the 'Revenge of the Pancakes' coding challenge.
+// Package flipper contains my personal solution to the 'Revenge of the Pancakes' coding challenge.
 package flipper
 
 import (
