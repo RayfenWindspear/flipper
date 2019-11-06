@@ -10,16 +10,16 @@ const minusByteValue = 45
 var errFlipTooMany = errors.New("specified too many pancakes to flip")
 var errInvalidString = errors.New("invalid input string. Must only consist of + or - characters.")
 
-// stack represents a stack of pancakes and has some ease of use methods
-type stack struct {
+// Stack represents a stack of pancakes and has some ease of use methods.
+type Stack struct {
 	cakes []bool
 	flips int
 }
 
-// NewStack takes a string of + and - and returns a stack struct
-func NewStack(in string) (*stack, error) {
+// NewStack takes a string of + and - and returns a Stack struct pointer.
+func NewStack(in string) (*Stack, error) {
 	// restructure as []bool so we can work in place
-	s := &stack{}
+	s := &Stack{}
 	s.cakes = make([]bool, len(in))
 	for i, v := range in {
 		if v != plusByteValue && v != minusByteValue {
@@ -31,9 +31,9 @@ func NewStack(in string) (*stack, error) {
 	return s, nil
 }
 
-// flip flips the first n pancakes in-place in the slice of bools and increments the flip count.
+// Flip flips the first n pancakes in-place in the slice of bools and increments the internal flip counter.
 // n <= 0 is a noOp.
-func (s *stack) flip(n int) error {
+func (s *Stack) Flip(n int) error {
 	if n == 0 {
 		return nil
 	}
@@ -52,8 +52,8 @@ func (s *stack) flip(n int) error {
 	return nil
 }
 
-// isHappy checks if all are true and we are done.
-func (s *stack) isHappy() bool {
+// IsHappy checks if all the pancakes are happy side up and we are done.
+func (s *Stack) IsHappy() bool {
 	for _, v := range s.cakes {
 		if !v {
 			return false
@@ -62,9 +62,9 @@ func (s *stack) isHappy() bool {
 	return true
 }
 
-// lowestFlip finds the first from the bottom that needs to be flipped.
-// Returns how many to flip to fix it for directly passing into stack.flip
-func (s *stack) lowestFlip() int {
+// LowestFlip finds the first from the bottom that needs to be flipped.
+// Returns how many to flip to fix it for directly passing into Flip
+func (s *Stack) LowestFlip() int {
 	for i := len(s.cakes) - 1; i >= 0; i-- {
 		if !s.cakes[i] {
 			return i + 1 // flip method wants how many to flip, not index. so +1
@@ -73,10 +73,10 @@ func (s *stack) lowestFlip() int {
 	return 0
 }
 
-// prepTop returns the number to pre-flip on top to make sure at least the top pancake (or more) is -, so that a deep flip actually makes n'th happy.
-// In other words, it returns the number of consecutive "+"'s from the top to flip.
-// Directly compatible with stack.flip
-func (s *stack) prepTop() int {
+// PrepTop returns the number to pre-flip on top to make sure at least the top pancake (or more) is -, so that a deep flip actually makes n'th happy.
+// In other words, it returns the number of consecutive +'s from the top to flip.
+// Directly compatible with Flip
+func (s *Stack) PrepTop() int {
 	num := 0
 	for _, v := range s.cakes {
 		if !v {
@@ -88,7 +88,7 @@ func (s *stack) prepTop() int {
 }
 
 // equals is just a helper method for checking the state of those yummy pancakes to see if their current state is equal to the passed in slice.
-func (s *stack) equals(test []bool) bool {
+func (s *Stack) Equals(test []bool) bool {
 	if len(s.cakes) != len(test) {
 		return false
 	}
@@ -98,4 +98,18 @@ func (s *stack) equals(test []bool) bool {
 		}
 	}
 	return true
+}
+
+// EqualsString is just a helper method for checking the state of those yummy pancakes to see if their current state is equal to the passed in string.
+func (s *Stack) EqualsString(test string) (bool, error) {
+	ts, err := NewStack(test)
+	if err != nil {
+		return false, err
+	}
+	return s.Equals(ts.cakes), nil
+}
+
+// Count returns the current number of flips undertaken.
+func (s *Stack) Count() int {
+	return s.flips
 }

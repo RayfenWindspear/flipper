@@ -1,3 +1,4 @@
+// Package flipper contains a solution to the 'Revenge of the Pancakes' coding challenge.
 package flipper
 
 import (
@@ -7,8 +8,8 @@ import (
 	"os"
 )
 
-// flipper is the solver for the pancake problem. Handles the input and output and solves.
-type flipper struct {
+// Flipper is the solver for the pancake problem. Handles the input and output and solves.
+type Flipper struct {
 	length  int
 	problem []string
 	current int
@@ -17,8 +18,8 @@ type flipper struct {
 }
 
 // NewFlipper creates a new flipper struct with buffered io using the passed in input and output sinks.
-func NewFlipper(in io.Reader, out io.Writer) *flipper {
-	return &flipper{
+func NewFlipper(in io.Reader, out io.Writer) *Flipper {
+	return &Flipper{
 		length:  0,
 		problem: nil,
 		current: 0,
@@ -28,12 +29,12 @@ func NewFlipper(in io.Reader, out io.Writer) *flipper {
 }
 
 // newFlipper internal ease of use function just calls NewFlipper using os.Stdin and os.Stdout.
-func newFlipper() *flipper {
+func newFlipper() *Flipper {
 	return NewFlipper(os.Stdin, os.Stdout)
 }
 
-// readProblem reads the problem from flipper.reader and stores it in the struct members.
-func (f *flipper) readProblem() error {
+// ReadProblem reads the problem from the io.Reader input and stores it in the struct members.
+func (f *Flipper) ReadProblem() error {
 	_, err := fmt.Fscanf(f.reader, "%d\n", &f.length)
 	if err != nil {
 		return err
@@ -50,22 +51,23 @@ func (f *flipper) readProblem() error {
 	return nil
 }
 
-// solveNext preps and solves a single input line, the one indicated by the index 'current', and prints the solution to os.Stdout.
-// It solves by iteratively padding the top with as many "-"" as it can with 0-1 flip, then flipping from the bottommost "-"
-func (f *flipper) solveNext() error {
+// SolveNext preps and solves a single input line and prints the solution to the io.Writer output buffer.
+func (f *Flipper) SolveNext() error {
+	// It solves by iteratively padding the top with as many - as it can with 0-1 flips, then flipping from the bottommost -.
+	// Internal comment for solution just so it doesn't show up in godoc.
 	s, err := NewStack(f.problem[f.current])
 	if err != nil {
 		return err
 	}
-	for !s.isHappy() {
-		err := s.flip(s.prepTop())
+	for !s.IsHappy() {
+		err := s.Flip(s.PrepTop())
 		if err != nil {
 			return err
 		}
-		if s.isHappy() {
+		if s.IsHappy() {
 			break
 		}
-		err = s.flip(s.lowestFlip())
+		err = s.Flip(s.LowestFlip())
 		if err != nil {
 			return err
 		}
@@ -75,11 +77,11 @@ func (f *flipper) solveNext() error {
 	return nil
 }
 
-// solveAll just iterates and solves all the problems in the set.
-func (f *flipper) solveAll() error {
+// SolveAll just iterates and solves all the problems in the set.
+func (f *Flipper) SolveAll() error {
 	defer f.writer.Flush()
 	for i := 0; i < f.length; i++ {
-		err := f.solveNext()
+		err := f.SolveNext()
 		if err != nil {
 			return err
 		}
@@ -87,15 +89,20 @@ func (f *flipper) solveAll() error {
 	return nil
 }
 
+// Flush just calls the internal wrtier buffer's Flush method.
+func (f *Flipper) Flush() error {
+	return f.writer.Flush()
+}
+
 // DoEverything is just an exported function that creates a default flipper, reads the input, solves, and outputs.
 func DoEverything() error {
 	f := newFlipper()
 
-	err := f.readProblem()
+	err := f.ReadProblem()
 	if err != nil {
 		return err
 	}
-	err = f.solveAll()
+	err = f.SolveAll()
 	if err != nil {
 		return err
 	}

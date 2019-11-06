@@ -30,7 +30,7 @@ Case #8: 1
 func TestReadProblem(t *testing.T) {
 	f := NewFlipper(bytes.NewBuffer([]byte(data)), os.Stdout)
 
-	err := f.readProblem()
+	err := f.ReadProblem()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,15 +55,15 @@ func TestSolveNext(t *testing.T) {
 	out := bytes.NewBuffer(nil)
 	f := NewFlipper(bytes.NewBuffer([]byte(data)), out)
 
-	err := f.readProblem()
+	err := f.ReadProblem()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = f.solveNext()
+	err = f.SolveNext()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = f.solveNext()
+	err = f.SolveNext()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,11 +78,11 @@ func TestSolveAll(t *testing.T) {
 	out := bytes.NewBuffer(nil)
 	f := NewFlipper(bytes.NewBuffer([]byte(data)), out)
 
-	err := f.readProblem()
+	err := f.ReadProblem()
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = f.solveAll()
+	err = f.SolveAll()
 	if err != nil {
 		t.Fatal(err)
 	}

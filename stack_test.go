@@ -5,25 +5,25 @@ import (
 )
 
 func TestStackEquals(t *testing.T) {
-	s := &stack{}
+	s := &Stack{}
 	s.cakes = []bool{false, false, false, false, false, false}
 	test := []bool{false, false, false, false, false, false}
 
-	if !s.equals(test) {
+	if !s.Equals(test) {
 		t.Errorf("equals failed valid %+v, %+v\n", s.cakes, test)
 	}
 	test[5] = true
-	if s.equals(test) {
+	if s.Equals(test) {
 		t.Errorf("equals failed invalid %+v, %+v\n", s.cakes, test)
 	}
-	if s.equals([]bool{false, false, false, false, false}) {
+	if s.Equals([]bool{false, false, false, false, false}) {
 		t.Errorf("equals failed invalid short size %+v, %+v\n", s.cakes, test)
 	}
-	if s.equals([]bool{false, false, false, false, false, false, false}) {
+	if s.Equals([]bool{false, false, false, false, false, false, false}) {
 		t.Errorf("equals failed invalid long size %+v, %+v\n", s.cakes, test)
 	}
 	s.cakes = []bool{}
-	if !s.equals([]bool{}) {
+	if !s.Equals([]bool{}) {
 		t.Errorf("equals failed 0 length %+v, %+v\n", s.cakes, test)
 	}
 
@@ -33,12 +33,12 @@ func TestStackEquals(t *testing.T) {
 		for i := 0; i < l; i++ {
 			test = make([]bool, l)
 			s.cakes[i] = true
-			if s.equals(test) {
+			if s.Equals(test) {
 				t.Errorf("equals failed. should be false %+v, %+v\n", s.cakes, test)
 			}
 			for j := 0; j < l; j++ {
 				test[j] = true
-				check := s.equals(test)
+				check := s.Equals(test)
 				if i == j {
 					// test should succeed iff i == j
 					if !check {
@@ -59,28 +59,28 @@ func TestNewStack(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{true, true, true, true}) {
+	if !s.Equals([]bool{true, true, true, true}) {
 		t.Errorf("NewStack failed %+v\n", s.cakes)
 	}
 	s, err = NewStack("+-+-")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{true, false, true, false}) {
+	if !s.Equals([]bool{true, false, true, false}) {
 		t.Errorf("NewStack failed %+v\n", s.cakes)
 	}
 	s, err = NewStack("----")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{false, false, false, false}) {
+	if !s.Equals([]bool{false, false, false, false}) {
 		t.Errorf("NewStack failed %+v\n", s.cakes)
 	}
 	s, err = NewStack("----+")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{false, false, false, false, true}) {
+	if !s.Equals([]bool{false, false, false, false, true}) {
 		t.Errorf("NewStack failed %+v\n", s.cakes)
 	}
 
@@ -90,118 +90,175 @@ func TestNewStack(t *testing.T) {
 	}
 }
 
+func testStackEqualsStringCases(t *testing.T, s *Stack, cases []string) {
+	for _, test := range cases {
+		ok, err := s.EqualsString(test)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if ok {
+			t.Errorf("EqualsString failed: %s, %+v\n", test, s.cakes)
+		}
+	}
+}
+
+func TestStackEqualsString(t *testing.T) {
+	s, err := NewStack("++++")
+	if err != nil {
+		t.Fatal(err)
+	}
+	test := "++++"
+	ok, err := s.EqualsString(test)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ok {
+		t.Errorf("EqualsString failed: %s, %+v\n", test, s.cakes)
+	}
+	cases := []string{
+		"+++-",
+		"----",
+		"+-+-",
+		"-+-+",
+		"+---",
+	}
+	testStackEqualsStringCases(t, s, cases)
+
+	test = "+++++"
+	ok, err = s.EqualsString(test)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ok {
+		t.Errorf("EqualsString failed size diff: %s, %+v\n", test, s.cakes)
+	}
+
+	s, err = NewStack("-----")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases = []string{
+		"++++-",
+		"----+",
+		"+-+-+",
+		"-+-+-",
+		"+----",
+	}
+	testStackEqualsStringCases(t, s, cases)
+}
+
 func TestFlip(t *testing.T) {
-	s := &stack{}
+	s := &Stack{}
 	s.cakes = []bool{false, true, false, true, false}
-	err := s.flip(5)
+	err := s.Flip(5)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{true, false, true, false, true}) {
+	if !s.Equals([]bool{true, false, true, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
-	err = s.flip(4)
+	err = s.Flip(4)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{true, false, true, false, true}) {
+	if !s.Equals([]bool{true, false, true, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
-	err = s.flip(3)
+	err = s.Flip(3)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{false, true, false, false, true}) {
+	if !s.Equals([]bool{false, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
-	err = s.flip(2)
+	err = s.Flip(2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{false, true, false, false, true}) {
+	if !s.Equals([]bool{false, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
-	err = s.flip(1)
+	err = s.Flip(1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !s.equals([]bool{true, true, false, false, true}) {
+	if !s.Equals([]bool{true, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
 
-	err = s.flip(6)
+	err = s.Flip(6)
 	if err != errFlipTooMany {
 		t.Fatal("uncaught overflow error")
 	}
 }
 
 func TestIsHappy(t *testing.T) {
-	s := &stack{}
+	s := &Stack{}
 	s.cakes = []bool{false, true, false, true, false}
-	if s.isHappy() {
+	if s.IsHappy() {
 		t.Errorf("not a valid win condition")
 	}
 	s.cakes = []bool{true, true, false, true, false}
-	if s.isHappy() {
+	if s.IsHappy() {
 		t.Errorf("not a valid win condition")
 	}
 	s.cakes = []bool{true, true, true, true, false}
-	if s.isHappy() {
+	if s.IsHappy() {
 		t.Errorf("not a valid win condition")
 	}
 	s.cakes = []bool{false, false, false, false, false}
-	if s.isHappy() {
+	if s.IsHappy() {
 		t.Errorf("not a valid win condition")
 	}
 	s.cakes = []bool{true, true, true, true, true}
-	if !s.isHappy() {
+	if !s.IsHappy() {
 		t.Errorf("valid condition not detected")
 	}
 }
 
 func TestLowestFlip(t *testing.T) {
-	s := &stack{}
+	s := &Stack{}
 	s.cakes = []bool{false, true, false, true, false}
-	n := s.lowestFlip()
+	n := s.LowestFlip()
 	b := 5
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{false, false, false, false, true}
-	n = s.lowestFlip()
+	n = s.LowestFlip()
 	b = 4
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{false, true, false, true, true}
-	n = s.lowestFlip()
+	n = s.LowestFlip()
 	b = 3
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{false, false, true, true, true}
-	n = s.lowestFlip()
+	n = s.LowestFlip()
 	b = 2
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{false, true, true, true, true}
-	n = s.lowestFlip()
+	n = s.LowestFlip()
 	b = 1
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{true, true, true, true, true}
-	n = s.lowestFlip()
+	n = s.LowestFlip()
 	b = 0
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
@@ -209,51 +266,51 @@ func TestLowestFlip(t *testing.T) {
 }
 
 func TestPrepTop(t *testing.T) {
-	s := &stack{}
+	s := &Stack{}
 	s.cakes = []bool{false, false, false, false, false}
-	n := s.prepTop()
+	n := s.PrepTop()
 	b := 0
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{false, true, true, true, true}
-	n = s.prepTop()
+	n = s.PrepTop()
 	b = 0
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{true, false, true, true, true}
-	n = s.prepTop()
+	n = s.PrepTop()
 	b = 1
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{true, true, false, true, true}
-	n = s.prepTop()
+	n = s.PrepTop()
 	b = 2
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{true, true, true, false, true}
-	n = s.prepTop()
+	n = s.PrepTop()
 	b = 3
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{true, true, true, true, false}
-	n = s.prepTop()
+	n = s.PrepTop()
 	b = 4
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
 	}
 
 	s.cakes = []bool{true, true, true, true, true}
-	n = s.prepTop()
+	n = s.PrepTop()
 	b = 5
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
