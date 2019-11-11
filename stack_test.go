@@ -145,17 +145,31 @@ func TestStackEqualsString(t *testing.T) {
 		"+----",
 	}
 	testStackEqualsStringCases(t, s, cases)
+
+	// bad string
+	ok, err = s.EqualsString("+-+-0")
+	if ok || err != errInvalidString {
+		t.Errorf("EqualsString failed invalid string\n")
+	}
 }
 
 func TestFlip(t *testing.T) {
 	s := &Stack{}
 	s.cakes = []bool{false, true, false, true, false}
+	count := 0
+	if s.Count() != count {
+		t.Errorf("incorrect count %d, should be %d", s.Count(), count)
+	}
 	err := s.Flip(5)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !s.Equals([]bool{true, false, true, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
+	}
+	count = 1
+	if s.Count() != count {
+		t.Errorf("incorrect count %d, should be %d", s.Count(), count)
 	}
 
 	err = s.Flip(4)
@@ -165,6 +179,10 @@ func TestFlip(t *testing.T) {
 	if !s.Equals([]bool{true, false, true, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
+	count = 2
+	if s.Count() != count {
+		t.Errorf("incorrect count %d, should be %d", s.Count(), count)
+	}
 
 	err = s.Flip(3)
 	if err != nil {
@@ -172,6 +190,10 @@ func TestFlip(t *testing.T) {
 	}
 	if !s.Equals([]bool{false, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
+	}
+	count = 3
+	if s.Count() != count {
+		t.Errorf("incorrect count %d, should be %d", s.Count(), count)
 	}
 
 	err = s.Flip(2)
@@ -181,6 +203,10 @@ func TestFlip(t *testing.T) {
 	if !s.Equals([]bool{false, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
+	count = 4
+	if s.Count() != count {
+		t.Errorf("incorrect count %d, should be %d", s.Count(), count)
+	}
 
 	err = s.Flip(1)
 	if err != nil {
@@ -189,10 +215,18 @@ func TestFlip(t *testing.T) {
 	if !s.Equals([]bool{true, true, false, false, true}) {
 		t.Errorf("Bad flip check %+v\n", s.cakes)
 	}
+	count = 5
+	if s.Count() != count {
+		t.Errorf("incorrect count %d, should be %d", s.Count(), count)
+	}
 
 	err = s.Flip(6)
 	if err != errFlipTooMany {
 		t.Fatal("uncaught overflow error")
+	}
+	count = 5
+	if s.Count() != count {
+		t.Errorf("incorrect count %d, should be %d", s.Count(), count)
 	}
 }
 

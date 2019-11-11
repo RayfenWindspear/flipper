@@ -64,9 +64,6 @@ func (f *Flipper) SolveNext() error {
 		if err != nil {
 			return err
 		}
-		if s.IsHappy() {
-			break
-		}
 		err = s.Flip(s.LowestFlip())
 		if err != nil {
 			return err
