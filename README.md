@@ -1,6 +1,8 @@
 # flipper
 flippin pancakes!
 
+[![codecov](https://codecov.io/gh/RayfenWindspear/flipper/branch/master/graph/badge.svg)](https://codecov.io/gh/RayfenWindspear/flipper)
+
 Take home coding challenge.<br/>
 The builtin basic version uses os.Stdin and os.Stdout, but you can use whatever `io.Reader` and `io.Writer` you choose to pass in.
 The `example` directory has a `package main` you can run, or it's easy to import and make your own.
