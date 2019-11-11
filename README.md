@@ -1,7 +1,7 @@
 # flipper
 flippin pancakes!
 
-[![codecov](https://codecov.io/gh/RayfenWindspear/flipper/branch/master/graph/badge.svg)](https://codecov.io/gh/RayfenWindspear/flipper)
+[![Build Status](https://travis-ci.org/RayfenWindspear/flipper.svg?branch=master)](https://travis-ci.org/RayfenWindspear/flipper)[![codecov](https://codecov.io/gh/RayfenWindspear/flipper/branch/master/graph/badge.svg)](https://codecov.io/gh/RayfenWindspear/flipper)
 
 Take home coding challenge.<br/>
 The builtin basic version uses os.Stdin and os.Stdout, but you can use whatever `io.Reader` and `io.Writer` you choose to pass in.
