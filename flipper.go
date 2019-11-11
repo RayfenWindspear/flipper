@@ -60,13 +60,11 @@ func (f *Flipper) SolveNext() error {
 		return err
 	}
 	for !s.IsHappy() {
-		err := s.Flip(s.PrepTop())
-		if err != nil {
-			return err
+		if err := s.Flip(s.PrepTop()); err != nil {
+			return err // unreachable as written
 		}
-		err = s.Flip(s.LowestFlip())
-		if err != nil {
-			return err
+		if err := s.Flip(s.LowestFlip()); err != nil {
+			return err // unreachable as written
 		}
 	}
 	f.current++
