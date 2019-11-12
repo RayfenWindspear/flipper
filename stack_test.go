@@ -1,6 +1,7 @@
 package flipper
 
 import (
+	"runtime"
 	"sync"
 	"testing"
 )
@@ -412,7 +413,14 @@ func breakStuff(s *Stack, length int, cakes bool, kill chan bool) {
 
 func TestSolveErrorReturnsHack(t *testing.T) {
 	// as written, it's not possible to have Solve return an error... unless we break it using concurrency!
-	routines := 4
+
+	// take into account GOMAXPROCS for CI. hopefully it works...
+	gmp := runtime.GOMAXPROCS(-1)
+	if gmp < 4 {
+		runtime.GOMAXPROCS(4)
+	}
+	routines := 2
+
 	wg := &sync.WaitGroup{}
 
 	s, err := NewStack("+++-")
