@@ -412,8 +412,6 @@ func breakStuff(s *Stack, length int, cakes bool, kill chan bool) {
 
 func TestSolveErrorReturnsHack(t *testing.T) {
 	// as written, it's not possible to have Solve return an error... unless we break it using concurrency!
-	maxIterations := 100000000
-	current := 0
 	routines := 4
 	wg := &sync.WaitGroup{}
 
@@ -437,8 +435,8 @@ func TestSolveErrorReturnsHack(t *testing.T) {
 		defer func() {
 			if r := recover(); r != nil {
 				// if it causes a panic, we gotta try again :(
-				wg.Done()
 				TestSolveErrorReturnsHack(t)
+				wg.Done()
 			}
 		}()
 		for {
@@ -446,11 +444,6 @@ func TestSolveErrorReturnsHack(t *testing.T) {
 			if err == errFlipTooMany {
 				break
 			}
-			if current > maxIterations {
-				//t.Error("failed to cause race condition for PrepTop")
-				break
-			}
-			current++
 		}
 		wg.Done()
 	}()
@@ -458,7 +451,6 @@ func TestSolveErrorReturnsHack(t *testing.T) {
 	for i := 0; i < routines; i++ {
 		kill <- true
 	}
-	current = 0
 
 	// break when LowestFlip makes Solve fail.
 	// when race condition triggers, LowestFlip will return 5, which is too many.
@@ -474,8 +466,8 @@ func TestSolveErrorReturnsHack(t *testing.T) {
 		defer func() {
 			if r := recover(); r != nil {
 				// if it causes a panic, we gotta try again :(
-				wg.Done()
 				TestSolveErrorReturnsHack(t)
+				wg.Done()
 			}
 		}()
 		for {
@@ -483,11 +475,6 @@ func TestSolveErrorReturnsHack(t *testing.T) {
 			if err == errFlipTooMany {
 				break
 			}
-			if current > maxIterations {
-				//t.Error("failed to cause race condition for LowestFlip")
-				break
-			}
-			current++
 		}
 		wg.Done()
 	}()
