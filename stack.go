@@ -113,3 +113,20 @@ func (s *Stack) EqualsString(test string) (bool, error) {
 func (s *Stack) Count() int {
 	return s.flips
 }
+
+// Solve solves the stack of pancakes represented by this Stack instance and returns the number of flips.
+func (s *Stack) Solve() (int, error) {
+	// It solves by iteratively padding the top with as many - as it can with 0-1 flips, then flipping from the bottommost -.
+	// Internal comment for solution just so it doesn't show up in godoc.
+	for !s.IsHappy() {
+		n := s.PrepTop()
+		if err := s.Flip(n); err != nil {
+			return -1, err // unreachable as written
+		}
+		n = s.LowestFlip()
+		if err := s.Flip(n); err != nil {
+			return -1, err // unreachable as written
+		}
+	}
+	return s.Count(), nil
+}

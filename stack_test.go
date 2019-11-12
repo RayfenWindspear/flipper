@@ -1,6 +1,7 @@
 package flipper
 
 import (
+	"sync"
 	"testing"
 )
 
@@ -348,5 +349,150 @@ func TestPrepTop(t *testing.T) {
 	b = 5
 	if n != b {
 		t.Errorf("%d should be %d", n, b)
+	}
+}
+
+func solveCase(t *testing.T, in string, sol int) {
+	s, err := NewStack(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	flips, err := s.Solve()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if flips != sol {
+		t.Errorf("solution incorrect: %d, expected: %d\n", flips, sol)
+	}
+}
+
+func TestSolve(t *testing.T) {
+	cases := []string{
+		"-",
+		"-+",
+		"+-",
+		"+++",
+		"--+-",
+	}
+	solutions := []int{
+		1,
+		1,
+		2,
+		0,
+		3,
+	}
+	if len(cases) != len(solutions) {
+		t.Errorf("bad Solve cases/solutions")
+	}
+
+	for i := range cases {
+		solveCase(t, cases[i], solutions[i])
+	}
+}
+
+func breakStuff(s *Stack, length int, cakes bool, kill chan bool) {
+	for {
+		copee := make([]bool, length)
+		if cakes {
+			for i := range copee {
+				copee[i] = true
+			}
+		}
+		if length == 4 {
+			copee[3] = false
+		}
+		select {
+		case <-kill:
+			return
+		default:
+			s.cakes = copee
+		}
+	}
+}
+
+func TestSolveErrorReturnsHack(t *testing.T) {
+	// as written, it's not possible to have Solve return an error... unless we break it using concurrency!
+	maxIterations := 100000000
+	current := 0
+	routines := 4
+	wg := &sync.WaitGroup{}
+
+	s, err := NewStack("+++-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	kill := make(chan bool)
+
+	// break when PrepTop makes Solve fail.
+	// when race condition triggers, PrepTop gets set by breakStuff and returns 5, which is too many.
+	// it cannot trigger on LowestFlip, as the race version has no -
+	for i := 0; i < routines/2; i++ {
+		go breakStuff(s, 5, true, kill)
+	}
+	for i := 0; i < routines/2; i++ {
+		go breakStuff(s, 4, true, kill)
+	}
+	wg.Add(1)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// if it causes a panic, we gotta try again :(
+				wg.Done()
+				TestSolveErrorReturnsHack(t)
+			}
+		}()
+		for {
+			_, err := s.Solve()
+			if err == errFlipTooMany {
+				break
+			}
+			if current > maxIterations {
+				//t.Error("failed to cause race condition for PrepTop")
+				break
+			}
+			current++
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+	for i := 0; i < routines; i++ {
+		kill <- true
+	}
+	current = 0
+
+	// break when LowestFlip makes Solve fail.
+	// when race condition triggers, LowestFlip will return 5, which is too many.
+	// cannot trigger PrepTop, as there are no +
+	for i := 0; i < routines; i++ {
+		go breakStuff(s, 5, false, kill)
+	}
+	for i := 0; i < routines/2; i++ {
+		go breakStuff(s, 4, true, kill)
+	}
+	wg.Add(1)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				// if it causes a panic, we gotta try again :(
+				wg.Done()
+				TestSolveErrorReturnsHack(t)
+			}
+		}()
+		for {
+			_, err := s.Solve()
+			if err == errFlipTooMany {
+				break
+			}
+			if current > maxIterations {
+				//t.Error("failed to cause race condition for LowestFlip")
+				break
+			}
+			current++
+		}
+		wg.Done()
+	}()
+	wg.Wait()
+	for i := 0; i < routines; i++ {
+		kill <- true
 	}
 }

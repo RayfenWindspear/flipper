@@ -53,22 +53,16 @@ func (f *Flipper) ReadProblem() error {
 
 // SolveNext preps and solves a single input line and prints the solution to the io.Writer output buffer.
 func (f *Flipper) SolveNext() error {
-	// It solves by iteratively padding the top with as many - as it can with 0-1 flips, then flipping from the bottommost -.
-	// Internal comment for solution just so it doesn't show up in godoc.
 	s, err := NewStack(f.problem[f.current])
 	if err != nil {
 		return err
 	}
-	for !s.IsHappy() {
-		if err := s.Flip(s.PrepTop()); err != nil {
-			return err // unreachable as written
-		}
-		if err := s.Flip(s.LowestFlip()); err != nil {
-			return err // unreachable as written
-		}
+	flips, err := s.Solve()
+	if err != nil {
+		return err // unreachable as written
 	}
 	f.current++
-	fmt.Fprintf(f.writer, "Case #%d: %d\n", f.current, s.flips)
+	fmt.Fprintf(f.writer, "Case #%d: %d\n", f.current, flips)
 	return nil
 }
 
