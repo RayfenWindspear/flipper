@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -96,7 +97,11 @@ func TestSolveAll(t *testing.T) {
 	}
 }
 
+// just to be extra sure we aren't getting stale data/not replacing os.Stdin
+var mockStdinMutex = sync.Mutex{}
+
 func mockStdin(data []byte) (func(), error) {
+	mockStdinMutex.Lock()
 	tmpfile, err := ioutil.TempFile("", "tmpfile")
 	if err != nil {
 		return nil, err
@@ -110,17 +115,23 @@ func mockStdin(data []byte) (func(), error) {
 
 	oldStdin := os.Stdin
 	os.Stdin = tmpfile
-	ranDefer := false
+	hasCleanedUp := false
 	return func() {
-		if !ranDefer {
+		if !hasCleanedUp {
 			tmpfile.Close()
 			os.Remove(tmpfile.Name()) // clean up
 			os.Stdin = oldStdin       // Restore original Stdin
+			hasCleanedUp = true
+			mockStdinMutex.Unlock()
 		}
 	}, nil
 }
 
+// just to be extra sure we aren't getting stale data/not replacing os.Stdout
+var mockStdoutMutex = sync.Mutex{}
+
 func mockStdout() (*os.File, func(), error) {
+	mockStdoutMutex.Lock()
 	tmpfile2, err := ioutil.TempFile("", "tmpfile2")
 	if err != nil {
 		return nil, nil, err
@@ -128,30 +139,31 @@ func mockStdout() (*os.File, func(), error) {
 
 	oldStdout := os.Stdout
 	os.Stdout = tmpfile2
-	ranDefer := false
+	hasCleanedUp := false
 	return tmpfile2, func() {
-		if !ranDefer {
+		if !hasCleanedUp {
 			os.Remove(tmpfile2.Name()) // clean up
-			os.Stdout = oldStdout      // Restore original Stdin
-			ranDefer = true
+			os.Stdout = oldStdout      // Restore original Stdout
+			hasCleanedUp = true
+			mockStdoutMutex.Unlock()
 		}
 	}, nil
 }
 
 func TestDoEverything(t *testing.T) {
 	// mock stdin
-	inDefer, err := mockStdin([]byte(data))
+	inCleanup, err := mockStdin([]byte(data))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer inDefer()
+	defer inCleanup()
 
 	// mock stdout
-	outfile, outDefer, err := mockStdout()
+	outfile, outCleanup, err := mockStdout()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer outDefer()
+	defer outCleanup()
 
 	err = DoEverything()
 	if err != nil {
@@ -174,30 +186,30 @@ func TestDoEverything(t *testing.T) {
 func TestMiscErrs(t *testing.T) {
 	// test err return reading length
 	// mock stdin
-	inDefer, err := mockStdin([]byte("a"))
+	inCleanup, err := mockStdin([]byte("a"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer inDefer()
+	defer inCleanup()
 	f := newFlipper()
 	err = f.ReadProblem()
 	if err == nil {
 		t.Errorf("ReadProblem should have failed")
 	}
-	inDefer() // explicitly clean up
+	inCleanup() // explicitly clean up
 
 	// test err return reading line
-	inDefer, err = mockStdin([]byte("2\n"))
+	inCleanup, err = mockStdin([]byte("2\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer inDefer()
+	defer inCleanup()
 	f = newFlipper()
 	err = f.ReadProblem()
 	if err == nil {
 		t.Errorf("ReadProblem should have failed")
 	}
-	inDefer() // explicitly clean up
+	inCleanup() // explicitly clean up
 
 	// test SolveNext NewStack err return
 	f.problem = []string{"a"}
@@ -212,26 +224,26 @@ func TestMiscErrs(t *testing.T) {
 	}
 
 	// test DoEverything Read fail
-	inDefer, err = mockStdin([]byte("3\n"))
+	inCleanup, err = mockStdin([]byte("3\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer inDefer()
+	defer inCleanup()
 	err = DoEverything()
 	if err == nil {
 		t.Errorf("DoEverything should have failed reading")
 	}
-	inDefer() // explicitly clean up
+	inCleanup() // explicitly clean up
 
 	// test DoEverything Solve fail
-	inDefer, err = mockStdin([]byte("1\nabcd\n"))
+	inCleanup, err = mockStdin([]byte("1\nabcd\n"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer inDefer()
+	defer inCleanup()
 	err = DoEverything()
 	if err == nil {
 		t.Errorf("DoEverything should have failed reading")
 	}
-	inDefer() // explicitly clean up
+	inCleanup() // explicitly clean up
 }
